@@ -36,12 +36,14 @@ def generate_starting_list(n, min_val, max_val):
         lst.append(random.randint(min_val, max_val))
     return lst
 
-def draw(draw_info):
+def draw(draw_info,algo_name, ascending):
     draw_info.window.fill(draw_info.BACKGROUND_COLOR)
+    title = draw_info.FONT.render(f"{algo_name} - {'Ascending' if ascending else 'Descending'}", 1, draw_info.BLACK)
+    draw_info.window.blit(title, (draw_info.width / 2 - title.get_width() / 2, 5))
     controls = draw_info.FONT.render("R - Reset | A - Ascending | D - Descending | Space - Start",1,draw_info.BLACK)
-    draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2, 5))
+    draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2, 35))
     sorts = draw_info.FONT.render("B - Bubble Sort | I - Insertion Sort", 1, draw_info.BLACK)
-    draw_info.window.blit(sorts, (draw_info.width / 2 - sorts.get_width() / 2, 35))
+    draw_info.window.blit(sorts, (draw_info.width / 2 - sorts.get_width() / 2, 65))
 
     draw_list(draw_info)
     pygame.display.update()
@@ -78,6 +80,28 @@ def bubble_sort (draw_info, ascending = True):
     return lst
 
 
+def insertion_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+
+    for i in range(1, len(lst)):
+        current = lst[i]
+        j = i - 1
+
+        while j >= 0:
+            ascending_sort = lst[j] > current and ascending
+            descending_sort = lst[j] < current and not ascending
+
+            if not ascending_sort and not descending_sort:
+                break
+
+            lst[j + 1] = lst[j]
+            j -= 1  # Move backwards
+            draw_list(draw_info, {j + 1: draw_info.GREEN, j + 2: draw_info.RED}, True)
+            yield True
+
+        lst[j + 1] = current
+    return lst
+
 def main():
     run = True
     n = 50
@@ -86,7 +110,7 @@ def main():
     sorting = False
     ascending = True
     sorting_algorithm = bubble_sort
-    sorting_algo_name = "bubble sort"
+    sorting_algo_name = "Bubble Sort"
     sorting_algorithm_generator = None
     lst = generate_starting_list(n, min_val, max_val)
     draw_info = DrawInformation(800,600, lst)
@@ -99,7 +123,7 @@ def main():
             except StopIteration:
                 sorting = False
         else:
-            draw(draw_info)
+            draw(draw_info,sorting_algo_name, ascending)
 
 
         for event in pygame.event.get():
@@ -119,6 +143,14 @@ def main():
                     ascending = True
                 elif event.key == pygame.K_d and not sorting:
                     ascending = False #fixed this!
+                elif event.key == pygame.K_b and not sorting:
+                    sorting_algorithm = bubble_sort
+                    sorting_algo_name = "Bubble Sort"
+                    sorting_algorithm_generator = None
+                elif event.key == pygame.K_i and not sorting:
+                    sorting_algorithm = insertion_sort
+                    sorting_algo_name = "Insertion Sort"
+                    sorting_algorithm_generator = None
     pygame.quit()
 
 if __name__ == "__main__":
