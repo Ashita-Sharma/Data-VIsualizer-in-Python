@@ -118,7 +118,7 @@ def main():
                 elif event.key == pygame.K_a and not sorting:
                     ascending = True
                 elif event.key == pygame.K_d and not sorting:
-                    ascending = True
+                    ascending = False
     pygame.quit()
 
 if __name__ == "__main__":
