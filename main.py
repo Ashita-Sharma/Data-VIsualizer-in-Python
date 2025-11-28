@@ -44,7 +44,8 @@ def draw(draw_info,algo_name, ascending):
     draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2, 35))
     sorts = draw_info.FONT.render("B - Bubble Sort | I - Insertion Sort | S - Selection Sort", 1, draw_info.BLACK)
     draw_info.window.blit(sorts, (draw_info.width / 2 - sorts.get_width() / 2, 65))
-
+    sorts2 = draw_info.FONT.render("Q - Quick Sort | H - Heap Sort", 1, draw_info.BLACK)
+    draw_info.window.blit(sorts2, (draw_info.width / 2 - sorts2.get_width() / 2, 95))
     draw_list(draw_info)
     pygame.display.update()
 
@@ -97,6 +98,38 @@ def selection_sort(draw_info, ascending=True):
 
     return lst
 
+
+def heap_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    n = len(lst)
+    def heapify(n, root_idx):
+        largest = root_idx
+        left = 2 * root_idx + 1
+        right = 2 * root_idx + 2
+        if left < n:
+            if (ascending and lst[left] > lst[largest]) or (not ascending and lst[left] < lst[largest]):
+                largest = left
+
+        if right < n:
+            if (ascending and lst[right] > lst[largest]) or (not ascending and lst[right] < lst[largest]):
+                largest = right
+        if largest != root_idx:
+            lst[root_idx], lst[largest] = lst[largest], lst[root_idx]
+            draw_list(draw_info, {root_idx: draw_info.GREEN, largest: draw_info.RED}, True)
+            yield True
+            yield from heapify(n, largest)
+
+    for i in range(n // 2 - 1, -1, -1):
+        yield from heapify(n, i)
+
+    for i in range(n - 1, 0, -1):
+
+        lst[0], lst[i] = lst[i], lst[0]
+        draw_list(draw_info, {0: draw_info.GREEN, i: draw_info.RED}, True)
+        yield True
+        yield from heapify(i, 0)
+    return lst
+
 def insertion_sort(draw_info, ascending=True):
     lst = draw_info.lst
 
@@ -118,6 +151,46 @@ def insertion_sort(draw_info, ascending=True):
 
         lst[j + 1] = current
     return lst
+
+
+def quick_sort(draw_info, ascending=True, start=0, end=None):
+    lst = draw_info.lst
+
+    if end is None:
+        end = len(lst) - 1
+
+    if start < end:
+        pivot_idx = yield from partition(draw_info, start, end, ascending)
+
+        yield from quick_sort(draw_info, ascending, start, pivot_idx - 1)
+        yield from quick_sort(draw_info, ascending, pivot_idx + 1, end)
+
+    return lst
+
+
+def partition(draw_info, start, end, ascending):
+    lst = draw_info.lst
+
+    pivot = lst[end]
+    pivot_idx = start
+
+    for j in range(start, end):
+        draw_list(draw_info, {j: draw_info.RED, end: draw_info.GREEN, pivot_idx: draw_info.BLACK}, True)
+        yield True
+
+        should_swap = (ascending and lst[j] < pivot) or (not ascending and lst[j] > pivot)
+
+        if should_swap:
+            lst[pivot_idx], lst[j] = lst[j], lst[pivot_idx]
+            draw_list(draw_info, {pivot_idx: draw_info.GREEN, j: draw_info.RED}, True)
+            pivot_idx += 1
+            yield True
+
+    lst[pivot_idx], lst[end] = lst[end], lst[pivot_idx]
+    draw_list(draw_info, {pivot_idx: draw_info.GREEN, end: draw_info.RED}, True)
+    yield True
+
+    return pivot_idx
 
 def main():
     run = True
@@ -172,6 +245,15 @@ def main():
                     sorting_algorithm = selection_sort
                     sorting_algo_name = "Selection Sort"
                     sorting_algorithm_generator = None
+                elif event.key == pygame.K_h and not sorting:
+                    sorting_algorithm = heap_sort
+                    sorting_algo_name = "Heap Sort"
+                    sorting_algorithm_generator = None
+                elif event.key == pygame.K_q and not sorting:
+                    sorting_algorithm = quick_sort
+                    sorting_algo_name = "Quick Sort"
+                    sorting_algorithm_generator = None
+
     pygame.quit()
 
 if __name__ == "__main__":
