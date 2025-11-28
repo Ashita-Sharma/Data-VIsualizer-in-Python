@@ -42,7 +42,7 @@ def draw(draw_info,algo_name, ascending):
     draw_info.window.blit(title, (draw_info.width / 2 - title.get_width() / 2, 5))
     controls = draw_info.FONT.render("R - Reset | A - Ascending | D - Descending | Space - Start",1,draw_info.BLACK)
     draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2, 35))
-    sorts = draw_info.FONT.render("B - Bubble Sort | I - Insertion Sort", 1, draw_info.BLACK)
+    sorts = draw_info.FONT.render("B - Bubble Sort | I - Insertion Sort | S - Selection Sort", 1, draw_info.BLACK)
     draw_info.window.blit(sorts, (draw_info.width / 2 - sorts.get_width() / 2, 65))
 
     draw_list(draw_info)
@@ -79,6 +79,23 @@ def bubble_sort (draw_info, ascending = True):
                 yield True
     return lst
 
+
+def selection_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+
+    for i in range(len(lst)):
+        extreme_idx = i
+        for j in range(i + 1, len(lst)):
+            draw_list(draw_info, {extreme_idx: draw_info.GREEN, j: draw_info.RED}, True)
+            yield True
+
+            if (ascending and lst[j] < lst[extreme_idx]) or (not ascending and lst[j] > lst[extreme_idx]):
+                extreme_idx = j
+        lst[i], lst[extreme_idx] = lst[extreme_idx], lst[i]
+        draw_list(draw_info, {i: draw_info.GREEN, extreme_idx: draw_info.RED}, True)
+        yield True
+
+    return lst
 
 def insertion_sort(draw_info, ascending=True):
     lst = draw_info.lst
@@ -136,7 +153,7 @@ def main():
                     lst = generate_starting_list(n, min_val, max_val)
                     draw_info.set_list(lst)
                     sorting = False
-                elif event.key == pygame.K_SPACE and not sorting:
+                elif event.key == pygame.K_RETURN and not sorting:
                     sorting = True
                     sorting_algorithm_generator = sorting_algorithm(draw_info, ascending)
                 elif event.key == pygame.K_a and not sorting:
@@ -150,6 +167,10 @@ def main():
                 elif event.key == pygame.K_i and not sorting:
                     sorting_algorithm = insertion_sort
                     sorting_algo_name = "Insertion Sort"
+                    sorting_algorithm_generator = None
+                elif event.key == pygame.K_s and not sorting:
+                    sorting_algorithm = selection_sort
+                    sorting_algo_name = "Selection Sort"
                     sorting_algorithm_generator = None
     pygame.quit()
 
